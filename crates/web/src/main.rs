@@ -5,6 +5,7 @@ mod components;
 mod layout;
 mod pages;
 mod store;
+mod style;
 
 use dioxus::prelude::*;
 use nrz_vps_common::{AuthState, Credentials};
@@ -16,7 +17,6 @@ use crate::{
     store::AUTH,
 };
 
-const TAILWIND: Asset = asset!("/assets/tailwind.css");
 const LOGO: Asset = asset!("/assets/logo.svg");
 
 #[derive(Routable, Clone, PartialEq, Debug)]
@@ -68,7 +68,7 @@ fn App() -> Element {
     });
     let auth = AUTH.read().clone();
     rsx! {
-        document::Stylesheet { href: TAILWIND }
+        document::Style { {style::CSS} }
         document::Link { rel: "icon", href: LOGO }
         document::Meta { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" }
         document::Title { "nrzVPS" }

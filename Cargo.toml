@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/common", "crates/server", "crates/web"]
+members = ["crates/common", "crates/server", "crates/web", "xtask"]
 exclude = ["vendor/icons", "vendor/tw_merge"]
 
 [workspace.package]
