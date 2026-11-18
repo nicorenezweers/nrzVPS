@@ -4,7 +4,7 @@ members = ["crates/common", "crates/server", "crates/web", "xtask"]
 exclude = ["vendor/icons", "vendor/tw_merge"]
 
 [workspace.package]
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 license = "MIT"
 

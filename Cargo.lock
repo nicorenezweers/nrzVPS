@@ -2160,7 +2160,7 @@ dependencies = [
 
 [[package]]
 name = "nrz-vps"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "argon2",
@@ -2193,7 +2193,7 @@ dependencies = [
 
 [[package]]
 name = "nrz-vps-common"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2201,7 +2201,7 @@ dependencies = [
 
 [[package]]
 name = "nrz-vps-web"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "dioxus",
  "gloo-net",
@@ -4001,7 +4001,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "serde_json",
 ]
