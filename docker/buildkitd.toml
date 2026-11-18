@@ -1,4 +1,4 @@
-# Die Registry von nrzGit spricht nur HTTP
+# Die Registry von nrzGit spricht nur HTTP. Kein `insecure`: sonst versucht buildkit zuerst HTTPS
+# und bekommt eine https-Token-Adresse mit nicht vertrauenswürdigem Zertifikat.
 [registry."100.78.107.162:8390"]
   http = true
-  insecure = true

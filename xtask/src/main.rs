@@ -50,6 +50,15 @@ CMD ["nrz-vps"]
 const BUILDKITD: &str = "docker/buildkitd.toml";
 
 fn main() -> ExitCode {
+    // Von `cargo run` gesetzte Paket-Variablen nicht an dx/cargo weiterreichen (dx sucht sonst
+    // das Binary von xtask statt das der Weboberfläche).
+    for (key, _) in env::vars_os() {
+        let k = key.to_string_lossy();
+        if ["CARGO_PKG_", "CARGO_MANIFEST_", "CARGO_BIN_", "CARGO_CRATE_", "CARGO_PRIMARY_"].iter().any(|p| k.starts_with(p)) {
+            // SAFETY: noch einfädig, vor jedem anderen Zugriff auf die Umgebung
+            unsafe { env::remove_var(&key) };
+        }
+    }
     let args: Vec<String> = env::args().skip(1).collect();
     let res = match args.first().map(String::as_str) {
         Some("css") => css(),
