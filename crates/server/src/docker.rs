@@ -208,13 +208,12 @@ impl Docker {
         Self::ndjson(resp, |v| {
             if let Some(s) = v.get("stream").and_then(Value::as_str) {
                 for l in s.lines() {
-                    if let Some(h) = l.trim().strip_prefix("---> ") {
-                        if h.len() == 12
-                            && h.chars().all(|c| c.is_ascii_hexdigit())
-                            && !layers.iter().any(|x| x == h)
-                        {
-                            layers.push(h.to_string());
-                        }
+                    if let Some(h) = l.trim().strip_prefix("---> ")
+                        && h.len() == 12
+                        && h.chars().all(|c| c.is_ascii_hexdigit())
+                        && !layers.iter().any(|x| x == h)
+                    {
+                        layers.push(h.to_string());
                     }
                     if !l.trim().is_empty() {
                         log(l.to_string());
