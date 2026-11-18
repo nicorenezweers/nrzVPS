@@ -1,0 +1,30 @@
+[workspace]
+resolver = "3"
+members = ["crates/common", "crates/server", "crates/web"]
+exclude = ["vendor/icons", "vendor/tw_merge"]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+nrz-vps-common = { path = "crates/common" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[patch.crates-io]
+tw_merge = { path = "vendor/tw_merge/tw_merge" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
+strip = true
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+# wasm-bindgen braucht seine Custom-Sections: nie strippen
+strip = false

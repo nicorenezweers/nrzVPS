@@ -1,0 +1,14 @@
+[application]
+name = "nrzVPS"
+
+[web.app]
+title = "nrzVPS"
+
+# Entwicklung: `cargo run -p nrz-vps` (Port 34100) + `dx serve` hier → API wird weitergeleitet.
+[[web.proxy]]
+backend = "http://127.0.0.1:34100/api/"
+
+[[web.proxy]]
+backend = "http://127.0.0.1:34100/mcp"
+[[web.proxy]]
+backend = "http://127.0.0.1:34100/llm.txt"

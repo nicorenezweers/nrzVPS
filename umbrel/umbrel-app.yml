@@ -1,0 +1,72 @@
+manifestVersion: 1
+id: nrz-vps
+category: developer
+name: nrzVPS
+version: "1.0.0"
+tagline: "Hosting fuer Freunde und Familie - strenge Grenzen, Apps per KI (MCP) hochladen"
+icon: http://100.78.107.162:8390/nicorenezweers/nrzStore/raw/branch/main/nrz-vps/icon.png
+port: 34100
+path: ""
+description: >-
+  nrzVPS macht aus deinem Umbrel einen kleinen Hosting-Server fuer Freunde und
+  Familie. Du stellst nur Netzwerk und Leistung bereit - wer ein Konto hat, hostet
+  seine Apps selbst, am einfachsten ueber seine KI (MCP). Komplett in Rust (axum,
+  Dioxus mit nrzUI).
+
+
+  ## Was die App kann
+
+
+  - **Quellcode genuegt** - kein Dockerfile, kein Image noetig. nrzVPS erkennt
+  Node.js, Bun, Deno, Python, Rust, Go, PHP und statische Seiten selbst und baut
+  daraus einen Container. Ein mitgeliefertes Dockerfile wird genutzt.
+
+
+  - **Git und nrzGit** - Repository verbinden (auch privat mit Token), Webhook in
+  nrzGit eintragen: jeder Push baut und startet die App neu. Fertige Images (auch
+  aus der nrzGit-Registry) gehen ebenfalls.
+
+
+  - **Alte Images sofort weg** - nach jedem Update werden das alte Image,
+  Zwischenstufen und Basis-Images geloescht. Speicher bleibt frei.
+
+
+  - **Wirklich streng** - Gesamt-CPU (z. B. 1 Kern), RAM und Speicher legst du
+  fest; die Kontingente der Benutzer duerfen zusammen nie mehr sein. Jede App hat
+  harte CPU-, RAM- und Prozess-Grenzen, keine Privilegien und ein eigenes Netz pro
+  Benutzer. Builds laufen nacheinander mit eigenem Budget.
+
+
+  - **10 Benutzer, je 10 Ports** - Benutzer 1 bekommt 34000-34009, Benutzer 2
+  34010-34019 und so weiter bis 34099.
+
+
+  - **MCP fuer KI-Agenten** - Claude, Cursor & Co. legen Apps an, laden Code hoch,
+  deployen, lesen Logs und fuehren Befehle aus. /llm.txt erklaert der KI alles.
+
+
+  ## Erste Schritte
+
+
+  Beim ersten Oeffnen legst du dein Admin-Konto an. Unter Ressourcen stellst du
+  Gesamt-CPU, RAM und Speicher ein, unter Benutzer legst du Konten fuer Freunde
+  an. Jeder Benutzer erstellt unter "Mit KI hosten" einen Token und sagt seiner KI
+  einfach: "Hoste dieses Projekt auf nrzVPS".
+
+
+  Hinweis: nrzVPS nutzt den Docker-Dienst des Geraets, um die Apps als eigene
+  Container zu starten.
+releaseNotes: >-
+  Erste Version: Apps aus Quellcode, Git oder Image, strenge Kontingente, 10
+  Benutzer mit je 10 Ports, MCP-Server und llm.txt.
+developer: nrz
+website: http://100.78.107.162:8390/nicorenezweers/nrzVPS
+submitter: nrz
+submission: http://100.78.107.162:8390/nicorenezweers/nrzStore
+repo: http://100.78.107.162:8390/nicorenezweers/nrzVPS
+support: http://100.78.107.162:8390/nicorenezweers/nrzVPS/issues
+dependencies:
+  - nrz-git
+defaultUsername: ""
+defaultPassword: ""
+gallery: []

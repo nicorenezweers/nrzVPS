@@ -1,0 +1,38 @@
+[package]
+name = "nrz-vps"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "nrzVPS – Backend (axum): Benutzer, Kontingente, Apps als Docker-Container, Builds aus Quellcode, MCP"
+
+[dependencies]
+nrz-vps-common = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+axum = { version = "0.8", features = ["multipart", "macros"] }
+tower-http = { version = "0.6", features = ["fs", "compression-gzip"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "2"
+
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+bytes = "1"
+urlencoding = "2"
+
+argon2 = "0.5"
+rand = "0.9"
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+walkdir = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+flate2 = "1"
+tar = "0.4"
+toml = "0.8"

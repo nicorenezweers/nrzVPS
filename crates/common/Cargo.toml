@@ -1,0 +1,10 @@
+[package]
+name = "nrz-vps-common"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Gemeinsame API-Typen von nrzVPS (Server + Web)"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }

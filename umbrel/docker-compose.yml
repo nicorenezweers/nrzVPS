@@ -1,0 +1,50 @@
+services:
+  app_proxy:
+    environment:
+      APP_HOST: nrz-vps_web_1
+      APP_PORT: 8080
+      # nrzVPS hat eigene Konten; MCP (/mcp), Git-Webhooks (/api/hooks) und /llm.txt müssen
+      # ohne umbrelOS-Anmeldung erreichbar sein.
+      PROXY_AUTH_ADD: "false"
+    container_name: nrz-vps_app_proxy_1
+
+  web:
+    # Multi-Arch-Image (amd64 + arm64) aus der Registry von nrzGit. localhost:8390 = nrzGit auf
+    # diesem Gerät; Docker erlaubt dort HTTP ohne Einstellung.
+    image: localhost:8390/nicorenezweers/nrz-vps:1.0.0
+    container_name: nrz-vps_web_1
+    restart: unless-stopped
+    init: true
+    # Root, aber ohne Fähigkeiten ausser Dateirechten: /data gehört 1000:1000, der Docker-Socket root.
+    user: "0:0"
+    environment:
+      - TZ=Europe/Zurich
+      - NRZ_VPS_BIND=0.0.0.0:8080
+      - NRZ_VPS_DATA=/data
+      # Git-Klone laufen in diesem Container: nrzGit über das Gateway des Umbrel-Netzes erreichen.
+      - NRZ_VPS_GIT_REWRITE=100.78.107.162:8390=10.21.0.1:8390
+      # Images zieht der Docker-Dienst des Hosts: dort ist nrzGit unter localhost:8390 (HTTP erlaubt).
+      - NRZ_VPS_REGISTRY_REWRITE=100.78.107.162:8390=localhost:8390
+      # Erzwingt pro Release einen frischen Container.
+      - APP_VERSION=${APP_VERSION}
+    volumes:
+      # Zustand (Konten, Apps), hochgeladener Quellcode, Build-Protokolle.
+      - ${APP_DATA_DIR}/data:/data
+      # Docker des Hosts (ausdrücklich gewünscht): nrzVPS legt die Apps der Benutzer als eigene,
+      # streng begrenzte Container an (CPU, RAM, PIDs, keine Privilegien, nur Ports 34000–34099).
+      # Damit hat nrzVPS volle Rechte auf Docker – die Benutzer selbst bekommen sie nie.
+      - /var/run/docker.sock:/var/run/docker.sock
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

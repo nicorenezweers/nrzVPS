@@ -1,0 +1,4 @@
+# Die Registry von nrzGit spricht nur HTTP
+[registry."100.78.107.162:8390"]
+  http = true
+  insecure = true

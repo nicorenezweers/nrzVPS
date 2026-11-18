@@ -1,0 +1,7 @@
+/target
+**/target/
+/data
+.dioxus/
+/dist
+.DS_Store
+*.part

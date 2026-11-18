@@ -1,0 +1,17 @@
+{
+  "store": "nicorenezweers/nrzStore",
+  "app": "nrz-vps",
+  "image": "nicorenezweers/nrz-vps",
+  "package": "umbrel",
+  "releaseNotes": "Erste Version: Apps aus Quellcode, Git oder Image, strenge Kontingente, 10 Benutzer mit je 10 Ports, MCP-Server und llm.txt.",
+  "manifest": {
+    "name": "nrzVPS",
+    "tagline": "Hosting fuer Freunde und Familie - strenge Grenzen, Apps per KI (MCP) hochladen",
+    "category": "developer",
+    "icon": "http://100.78.107.162:8390/nicorenezweers/nrzStore/raw/branch/main/nrz-vps/icon.png",
+    "port": 34100,
+    "repo": "http://100.78.107.162:8390/nicorenezweers/nrzVPS",
+    "website": "http://100.78.107.162:8390/nicorenezweers/nrzVPS",
+    "support": "http://100.78.107.162:8390/nicorenezweers/nrzVPS/issues"
+  }
+}

@@ -1,0 +1,112 @@
+# nrzVPS – Anleitung für KI-Agenten
+
+nrzVPS ist ein kleiner Hosting-Server für Freunde und Familie. Du (die KI) hostest hier Apps für
+deinen Menschen. Er soll sich um nichts kümmern müssen: Du lädst den Code hoch, baust, startest,
+prüfst die Logs und nennst ihm am Ende nur die Adresse.
+
+Server: {{URL}}
+MCP:    {{URL}}/mcp   (Streamable HTTP, Header `Authorization: Bearer nrzvps_…`)
+Diese Datei: {{URL}}/llm.txt
+
+Den Token erstellt der Mensch in nrzVPS unter „Mit KI hosten“. Ohne Token: ihn darum bitten.
+
+
+## 1. Was du wissen musst
+
+- Jeder Benutzer hat ein STRENGES Kontingent: CPU-Kerne, RAM, Speicherplatz, Anzahl Apps und genau
+  10 Ports (Block 34000–34009 für Benutzer 1, 34010–34019 für Benutzer 2 … bis 34099).
+  `get_info` zeigt Kontingent, Nutzung und freie Ports.
+- Eine App = ein Container. Quelle ist eins von:
+  - `upload` – Quellcode hochladen (KEIN Dockerfile, KEIN Image nötig – die Laufzeit wird erkannt)
+  - `git`    – Repository klonen (nrzGit, Gitea, GitHub …; privat mit `git_token`)
+  - `image`  – fertiges Image (Docker Hub, nrzGit-Registry, ghcr.io …)
+- Die App MUSS auf `0.0.0.0` und dem Port aus der Umgebungsvariable `PORT` lauschen.
+  Adresse danach: `http://<host>:<port>` (steht in `get_app` unter `urls`).
+- Dauerhafte Daten (SQLite, Uploads …) NUR unter `/data` (auch als `DATA_DIR` gesetzt).
+  Alles andere im Container ist nach jedem Deploy weg.
+- Apps desselben Benutzers erreichen sich über den App-Namen: `http://api:34001`.
+- Bei jedem Update wird das alte Image sofort gelöscht (Speicher sparen). Ein fehlgeschlagener
+  Build lässt die laufende Version weiterlaufen.
+- Builds teilen sich ein eigenes, begrenztes Build-Budget und laufen nacheinander. Rust- oder
+  grosse Node-Builds können ein paar Minuten dauern – das ist normal.
+
+
+## 2. Der normale Ablauf (Quellcode)
+
+1. `get_info` – Kontingent und freie Ports ansehen.
+2. `create_app` mit `name` (a-z, 0-9, -). Ohne weitere Angaben: Quelle `upload`, Laufzeit `auto`,
+   ein freier Port, CPU/RAM = freier Rest des Kontingents.
+3. `upload_files` – alle Projektdateien (Pfade relativ zur Projektwurzel; Binärdateien mit
+   `base64: true`). NICHT hochladen: node_modules, target, .git, .venv, dist (wenn gebaut wird).
+   Grosse Projekte: in mehreren Aufrufen, oder als zip/tar.gz mit `upload_archive`.
+   Hat dein Mensch eine Shell, geht es auch per HTTP:
+       tar czf app.tar.gz --exclude=node_modules --exclude=.git --exclude=target .
+       curl -X PUT -H "Authorization: Bearer $TOKEN" --data-binary @app.tar.gz \
+            "{{URL}}/api/apps/<name>/source?replace=true"
+4. `deploy` – wartet standardmässig bis der Build fertig ist und gibt das Build-Log-Ende zurück.
+5. Ist der Status `running`: `logs` kurz prüfen und dem Menschen die URL nennen.
+   Ist er `crashed`: `logs` lesen, Code korrigieren, erneut `upload_files` + `deploy`.
+
+
+## 3. Laufzeit-Erkennung (`runtime: auto`)
+
+| Datei im Projekt                         | Laufzeit   | Start (wenn `start_command` leer)                |
+|------------------------------------------|------------|--------------------------------------------------|
+| Dockerfile                               | dockerfile | CMD des Dockerfiles (EXPOSE/PORT selbst beachten) |
+| bun.lock / bun.lockb                     | bun        | index.ts / server.ts oder `bun run start`        |
+| package.json                             | node       | `npm start`, sonst `main`, server.js, index.js   |
+| deno.json                                | deno       | `deno task start` oder main.ts                   |
+| Cargo.toml                               | rust       | Programm aus [[bin]] bzw. [package].name         |
+| go.mod                                   | go         | `go build` → /app/app                            |
+| requirements.txt / pyproject.toml        | python     | uvicorn (FastAPI), gunicorn (Flask), sonst main.py/app.py |
+| composer.json / index.php                | php        | `php -S 0.0.0.0:$PORT`                           |
+| index.html (Wurzel, public/, dist/ …)    | static     | nginx auf $PORT                                  |
+
+Node: `npm run build` läuft automatisch, wenn es das Skript gibt. Lockfiles von pnpm/yarn werden
+erkannt. Abweichungen: `runtime`, `build_command`, `start_command` in `create_app`/`update_app`
+setzen. `start_command` läuft mit `sh -c`, `$PORT` ist verfügbar.
+
+
+## 4. Git und nrzGit
+
+    create_app { name: "blog", source: "git",
+                 git_url: "http://100.78.107.162:8390/besitzer/blog.git",
+                 git_branch: "main", git_token: "<nur bei privaten Repos>" }
+    deploy { app: "blog" }
+
+`get_app` liefert `webhook_url`. In nrzGit (Repository → Einstellungen → Webhooks, oder per
+nrzGit-MCP `create_webhook`) mit Ereignis „Push“ eintragen: jeder Push auf den Zweig baut und
+startet die App neu (`auto_deploy` ist bei Git standardmässig an).
+
+Images aus der nrzGit-Registry: `source: "image", image: "100.78.107.162:8390/besitzer/app:1.0"`,
+bei privaten Paketen `registry_username` + `registry_password` (Zugriffstoken).
+Für ein neues Image einfach erneut `deploy` – das alte wird danach gelöscht.
+
+
+## 5. Alle Werkzeuge (MCP)
+
+get_info · list_apps · get_app · create_app · upload_files · upload_archive · list_files ·
+read_file · deploy · power (start/stop/restart) · logs (build=true für Build-Log) · update_app ·
+set_env · add_port · remove_port · exec (Befehl im Container, 60 s) · delete_app (confirm=true)
+
+Alles gibt es auch als HTTP-API mit demselben Token (`Authorization: Bearer …`), Routen:
+GET/POST /api/apps, GET/PATCH/DELETE /api/apps/{id|name}, POST /api/apps/{id}/deploy,
+POST /api/apps/{id}/power {"action":"start|stop|restart"}, GET /api/apps/{id}/logs?lines=200,
+GET /api/apps/{id}/build-log, PUT /api/apps/{id}/source (zip/tar.gz), POST /api/apps/{id}/exec.
+
+
+## 6. Typische Fehler
+
+- „CPU-/RAM-Kontingent reicht nicht“ → andere App stoppen (`power stop`) oder `cpus`/`memory_mb`
+  der App senken (`update_app`). Mehr Kontingent vergibt nur der Admin.
+- „Alle 10 Ports sind belegt“ → `remove_port` bei einer anderen App oder App löschen.
+- Status `crashed` direkt nach dem Start → meist falscher Port (nicht $PORT) oder fehlende
+  Umgebungsvariable. `logs` lesen.
+- „Speicherplatz voll“ → alte Apps löschen; Daten unter /data zählen mit.
+- Speicher (OOM, Exit 137) → `memory_mb` erhöhen, falls das Kontingent reicht.
+
+
+## 7. Mit dem Menschen reden
+
+Halte es einfach. Er will nur hören: „Läuft! Deine App ist unter http://… erreichbar.“
+Technische Details nur, wenn er fragt. Frage nach, bevor du eine App löschst.

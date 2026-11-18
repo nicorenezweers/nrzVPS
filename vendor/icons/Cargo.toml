@@ -1,0 +1,22 @@
+[package]
+name = "icons"
+version = "0.19.0"
+authors = ["nrz"]
+homepage = "https://ui.zweers.ch/icons"
+repository = "https://git.zweers.ch/nicorenezweers/nrzUI/src/branch/main/crates/icons"
+edition = "2024"
+description = "Icons for Rust fullstack applications — Leptos and Dioxus."
+keywords = ["leptos", "dioxus", "icons", "tailwind", "svg"]
+categories = ["gui", "web-programming", "development-tools", "accessibility", "wasm"]
+license = "MIT"
+readme = "./README.md"
+
+
+[dependencies]
+dioxus = { version = "0.7", optional = true }
+strum = { version = "0.28", features = ["derive"] }
+tw_merge = { path = "../tw_merge/tw_merge" }
+
+[features]
+dioxus = ["dep:dioxus"]
+dioxus_animated = ["dioxus"]
